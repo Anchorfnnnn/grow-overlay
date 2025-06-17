@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: transparent;
+      color: #fff;
+      font-size: 14px;
+    }
+    .shop { margin-bottom: 8px; }
+    .shop h2 { margin: 0 0 4px; font-size: 16px; color: #a0e87e; }
+    .item { margin-left: 12px; }
+  </style>
+</head>
+<body>
+  <div id="content"></div>
+  <script>
+    async function refresh() {
+      try {
+        const res = await fetch('https://growagardenstock.org/');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const shops = ['Seeds Stock', 'Gear Stock', 'Egg Stock'];
+        let out = '';
+        shops.forEach(title => {
+          const el = [...doc.querySelectorAll('h2')].find(h => h.textContent.includes(title));
+          if (el) {
+            out += '<div class="shop"><h2>' + title + '</h2>';
+            let next = el.nextElementSibling;
+            while (next && next.tagName !== 'H2') {
+              out += '<div class="item">' + next.textContent.trim() + '</div>';
+              next = next.nextElementSibling;
+            }
+            out += '</div>';
+          }
+        });
+        document.getElementById('content').innerHTML = out;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    refresh();
+    setInterval(refresh, 30000);
+  </script>
+</body>
+</html>
